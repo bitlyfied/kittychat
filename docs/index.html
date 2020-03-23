@@ -1,1 +1,175 @@
-Hello World
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <title>KittyChat</title>
+
+    <!-- Bootstrap core CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">KittyChat 🐈</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarResponsive"
+          aria-controls="navbarResponsive"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 text-center">
+          <div id="chat-box-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.12.0/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.12.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.12.0/firebase-firestore.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAvUPPgMHx1tx_dV9ryEwnkvQy0pCW_BZM",
+        authDomain: "kittychat-hakuna.firebaseapp.com",
+        databaseURL: "https://kittychat-hakuna.firebaseio.com",
+        projectId: "kittychat-hakuna",
+        storageBucket: "kittychat-hakuna.appspot.com",
+        messagingSenderId: "75998374174",
+        appId: "1:75998374174:web:d6730b02d9649b03db410f"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      async function start() {
+        var db = firebase.firestore();
+        window.db = db;
+        console.log("THE DATABASE", db);
+
+        let querySnapshot = await db.collection("messages").get();
+        querySnapshot.forEach(doc => {
+          console.log(doc.id, doc.data());
+        });
+
+        db.collection("messages").onSnapshot(function(querySnapshot) {
+          var messages = [];
+          querySnapshot.forEach(function(doc) {
+            messages.push(doc.data());
+          });
+          console.log("Current messages:", messages);
+          Database.messages = messages;
+          App.render();
+        });
+
+        // await db
+        //   .collection("messages")
+        //   .add({ content: "Foruth message from original user", user_id: 1, user_name: "Val" });
+      }
+
+      start();
+
+      const Database = {
+        messages: []
+      };
+    </script>
+
+    <!-- Load React -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script
+      src="https://unpkg.com/react@16/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+
+    <script type="text/babel">
+      
+      class Message extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = { liked: false };
+        }
+
+        render() {
+          if (this.state.liked) {
+            return "You liked this.";
+          }
+
+          return (
+            <button onClick={() => this.setState({ liked: true })}>Like</button>
+          );
+        }
+      }
+
+      class ChatBox extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = { messages: Database.messages };
+        }
+
+        render() {
+          const { messages } = this.state;
+
+          let messagesBoxes = [];
+          for (let message of messages) {
+            messagesBoxes.push(
+              <li className="list-group-item">{message.content}</li>
+            );
+          }
+
+          return <ul className="list-group">{messagesBoxes}</ul>;
+        }
+      }
+
+      const App = {
+        render() {
+          const domContainer = document.querySelector("#chat-box-container");
+          ReactDOM.render(React.createElement(ChatBox), domContainer);
+        }
+      };
+    </script>
+  </body>
+</html>
